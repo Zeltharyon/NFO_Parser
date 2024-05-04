@@ -4,6 +4,7 @@ from pathlib import Path
 
 projectDir = str(Path(__file__).parent).replace('\\', '/')
 valid_templates = ["tvshow", "movie", "series"]
+failed_files = []
 
 input_path = input("Enter INPUT path : ")
 output_path = input("Enter OUTPUT path : ")
@@ -39,52 +40,59 @@ if os.path.isdir(input_path) and os.path.isdir(output_path):
 
         for name in arr:
 
-            old_file_path = input_path + name
-            new_file_path = output_path + name[0:len(name)-len('.info.json')] + '.nfo'
+            try:
+                old_file_path = input_path + name
+                new_file_path = output_path + name[0:len(name) - len('.info.json')] + '.nfo'
 
-            json_file = open(old_file_path, encoding='utf8')
-            data = json.load(json_file)
-            new_file = open(new_file_path, "w", encoding='utf8')
+                json_file = open(old_file_path, encoding='utf8')
+                data = json.load(json_file)
+                new_file = open(new_file_path, "w", encoding='utf8')
 
-            date_to_str = str(data['upload_date'])
-            data['upload_date'] = date_to_str[0:4] + '-' + date_to_str[4:6] + '-' + date_to_str[6:8]
+                date_to_str = str(data['upload_date'])
+                data['upload_date'] = date_to_str[0:4] + '-' + date_to_str[4:6] + '-' + date_to_str[6:8]
 
-            file_content = ''
-            for line in template_file.readlines():
-                new_line = ''
-                if 'json_keys' in line:
-                    while 'json_keys' in line:
-                        start = line.index('json_keys')
-                        sub_line = line[start:]
-                        end = sub_line.index(')') + (len(line) - len(sub_line)) + 1
-                        key = sub_line[len('json_keys('):sub_line.index(')')]
-                        json_values = list(data[key])
-                        lines = []
-                        if len(json_values) > 3:
-                            json_values = json_values[0:3]
-                        for val in json_values:
-                            l = line.replace(line[start:end], val)
-                            file_content += l
-                        line = ''
-                elif 'json_key' in line:
-                    while 'json_key' in line:
-                        start = line.index('json_key')
-                        sub_line = line[start:]
-                        end = sub_line.index(')') + (len(line) - len(sub_line)) + 1
-                        key = sub_line[len('json_key('):sub_line.index(')')]
-                        json_value = data[key]
-                        line = line.replace(line[start:end], json_value)
-                    file_content += line
-                else:
-                    file_content += line
+                file_content = ''
+                for line in template_file.readlines():
+                    new_line = ''
+                    if 'json_keys' in line:
+                        while 'json_keys' in line:
+                            start = line.index('json_keys')
+                            sub_line = line[start:]
+                            end = sub_line.index(')') + (len(line) - len(sub_line)) + 1
+                            key = sub_line[len('json_keys('):sub_line.index(')')]
+                            json_values = list(data[key])
+                            lines = []
+                            if len(json_values) > 3:
+                                json_values = json_values[0:3]
+                            for val in json_values:
+                                ln = line.replace(line[start:end], val)
+                                file_content += ln
+                            line = ''
+                    elif 'json_key' in line:
+                        while 'json_key' in line:
+                            start = line.index('json_key')
+                            sub_line = line[start:]
+                            end = sub_line.index(')') + (len(line) - len(sub_line)) + 1
+                            key = sub_line[len('json_key('):sub_line.index(')')]
+                            json_value = data[key]
+                            line = line.replace(line[start:end], json_value)
+                        file_content += line
+                    else:
+                        file_content += line
 
-            new_file.write(file_content)
-            new_file.close()
-            if deletion_selected:
-                os.remove(old_file_path)
-            print(new_file_path + " : FINISHED")
+                new_file.write(file_content)
+                new_file.close()
+                if deletion_selected:
+                    os.remove(old_file_path)
+                print(new_file_path + " : FINISHED")
+            except KeyError:
+                failed_files.append(name)
+
         print('')
-
+        if len(failed_files) > 0:
+            print("Some files were rejected : ")
+            for file_name in failed_files:
+                print('- ' + file_name)
     else:
         print("No valid template entered, end of process")
 
