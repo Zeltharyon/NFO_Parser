@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<movie>
+    <title>json_key(title)</title>
+    <originaltitle>json_key(title)</originaltitle>
+    <userrating>5</userrating>
+    <plot>json_key(description)</plot>
+    <mpaa></mpaa>
+    <uniqueid type="json_key(extractor)" default="true">json_key(display_id)</uniqueid>
+    <genre>json_keys(categories)</genre>
+    <tag>json_keys(tags)</tag>
+    <country>json_key(language)</country>
+    <director>json_key(uploader)</director>
+    <premiered>json_key(upload_date)</premiered>
+    <studio>json_key(uploader)</studio>
+</movie>

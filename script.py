@@ -1,50 +1,92 @@
 import os
 import json
-import sys
+from pathlib import Path
 
-input_path = sys.argv[1]
-output_path = sys.argv[2]
-template_path = sys.argv[3]
+projectDir = str(Path(__file__).parent).replace('\\', '/')
+valid_templates = ["tvshow", "movie", "series"]
 
-print('')
-print('Chemin des fichiers .json : ' + input_path)
-print('Chemin de sortie : ' + output_path)
-print('Fichier de template : ' + template_path + ' chargé')
-print('')
+input_path = input("Enter INPUT path : ")
+output_path = input("Enter OUTPUT path : ")
+template = input("Enter TEMPLATE (tvshow (default), movie, series) : ")
+delete_original_file = input("Delete original file? (y/N) : ")
+deletion_selected = False
+if template == '':
+    template = 'tvshow'
+if input_path[len(input_path) - 1] != '/':
+    input_path = input_path + '/'
+if output_path[len(output_path) - 1] != '/':
+    output_path = output_path + '/'
+if delete_original_file == 'y':
+    deletion_selected = True
 
-arr = [name for name in os.listdir(input_path) if '.json' in name]
-template_file = open(template_path, encoding='utf-8')
+if os.path.isdir(input_path) and os.path.isdir(output_path):
 
-print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
-print('')
+    template_path = projectDir + '/templates/' + template + '.nfo'
 
-for name in arr:
+    if template in valid_templates and os.path.isfile(template_path):
 
-    old_file_path = input_path + name
-    new_file_path = output_path + name[0:len(name)-len('.info.json')] + '.nfo'
+        print('')
+        print('Chemin des fichiers .json : ' + input_path)
+        print('Chemin de sortie : ' + output_path)
+        print('Fichier de template : ' + template_path + ' chargé')
+        print('')
 
-    json_file = open(old_file_path, encoding='utf8')
-    data = json.load(json_file)
-    new_file = open(new_file_path, "w", encoding='utf8')
+        arr = [name for name in os.listdir(input_path) if '.json' in name]
+        template_file = open(template_path, encoding='utf-8')
 
-    date_to_str = str(data['upload_date'])
-    data['upload_date'] = date_to_str[0:4] + '-' + date_to_str[4:6] + '-' + date_to_str[6:8]
+        print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+        print('')
 
-    file_content = ''
-    for line in template_file.readlines():
-        new_line = ''
-        try:
-            start = line.index('json_key')
-            sub_line = line[start:]
-            end = sub_line.index(')') + (len(line) - len(sub_line)) + 1
-            key = sub_line[len('json_key('):sub_line.index(')')]
-            json_value = data[key]
-            new_line = line.replace(line[start:end], json_value)
-        except ValueError:
-            new_line = line
-        file_content += new_line
+        for name in arr:
 
-    new_file.write(file_content)
-    new_file.close()
-    print(new_file_path + " : FINISHED")
-print('')
+            old_file_path = input_path + name
+            new_file_path = output_path + name[0:len(name)-len('.info.json')] + '.nfo'
+
+            json_file = open(old_file_path, encoding='utf8')
+            data = json.load(json_file)
+            new_file = open(new_file_path, "w", encoding='utf8')
+
+            date_to_str = str(data['upload_date'])
+            data['upload_date'] = date_to_str[0:4] + '-' + date_to_str[4:6] + '-' + date_to_str[6:8]
+
+            file_content = ''
+            for line in template_file.readlines():
+                new_line = ''
+                if 'json_keys' in line:
+                    while 'json_keys' in line:
+                        start = line.index('json_keys')
+                        sub_line = line[start:]
+                        end = sub_line.index(')') + (len(line) - len(sub_line)) + 1
+                        key = sub_line[len('json_keys('):sub_line.index(')')]
+                        json_values = list(data[key])
+                        lines = []
+                        if len(json_values) > 3:
+                            json_values = json_values[0:3]
+                        for val in json_values:
+                            l = line.replace(line[start:end], val)
+                            file_content += l
+                        line = ''
+                elif 'json_key' in line:
+                    while 'json_key' in line:
+                        start = line.index('json_key')
+                        sub_line = line[start:]
+                        end = sub_line.index(')') + (len(line) - len(sub_line)) + 1
+                        key = sub_line[len('json_key('):sub_line.index(')')]
+                        json_value = data[key]
+                        line = line.replace(line[start:end], json_value)
+                    file_content += line
+                else:
+                    file_content += line
+
+            new_file.write(file_content)
+            new_file.close()
+            if deletion_selected:
+                os.remove(old_file_path)
+            print(new_file_path + " : FINISHED")
+        print('')
+
+    else:
+        print("No valid template entered, end of process")
+
+else:
+    print("No valid paths entered, end of process")

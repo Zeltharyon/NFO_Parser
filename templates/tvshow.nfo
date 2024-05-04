@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<tvshow>
+    <title>json_key(title)</title>
+    <plot>json_key(description)</plot>
+    <userrating>5</userrating>
+    <mpaa></mpaa>
+    <uniqueid type="json_key(extractor)" default="true">json_key(display_id)</uniqueid>
+    <genre>json_keys(categories)</genre>
+    <premiered>json_key(upload_date)</premiered>
+    <status></status>
+    <studio>json_key(uploader)</studio>
+    <namedseason number="1"></namedseason>
+</tvshow>
