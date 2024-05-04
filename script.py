@@ -4,7 +4,7 @@ import sys
 
 input_path = sys.argv[1]
 output_path = sys.argv[2]
-template_path = '/template.nfo'
+template_path = 'template.nfo'
 
 print('')
 print('Chemin des fichiers .json : ' + input_path)
