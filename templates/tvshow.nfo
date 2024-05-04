@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
 <tvshow>
     <title>json_key(title)</title>
+    <episode>json_key(playlist_index)</episode>
     <plot>json_key(description)</plot>
     <userrating>5</userrating>
     <mpaa></mpaa>

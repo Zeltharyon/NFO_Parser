@@ -34,6 +34,7 @@ if os.path.isdir(input_path) and os.path.isdir(output_path):
 
         arr = [name for name in os.listdir(input_path) if '.json' in name]
         template_file = open(template_path, encoding='utf-8')
+        template_lines = template_file.readlines()
 
         print('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
         print('')
@@ -47,12 +48,16 @@ if os.path.isdir(input_path) and os.path.isdir(output_path):
                 json_file = open(old_file_path, encoding='utf8')
                 data = json.load(json_file)
                 new_file = open(new_file_path, "w", encoding='utf8')
+                file_content = ''
 
                 date_to_str = str(data['upload_date'])
+                try:
+                    data['playlist_index'] = str(data['playlist_index'])
+                except KeyError:
+                    data['playlist_index'] = '1'
                 data['upload_date'] = date_to_str[0:4] + '-' + date_to_str[4:6] + '-' + date_to_str[6:8]
 
-                file_content = ''
-                for line in template_file.readlines():
+                for line in template_lines:
                     new_line = ''
                     if 'json_keys' in line:
                         while 'json_keys' in line:
